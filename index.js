@@ -1,13 +1,21 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const Product = require('./models/product.model.js')
-const productRoute = require("./routes/product.routes.js");
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import bodyParser from "body-parser";
+
+
 const app = express()
-
 app.use(express.json());
-// app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: false}));
 
-app.use("/api/products", productRoute);
+//config cors & dotenv
+app.use(cors());
+dotenv.config();
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000')
@@ -17,9 +25,18 @@ app.get('/', (req, res) => {
     res.send('Hello express from the server!')
 });
 
+//mogoose connection....
+mongoose.set("strictQuery", true);
+mongoose.Promise = global.Promise;
+mongoose
+  .connect(process.env.MONGO_URL, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.log("Error connecting to MongoDB", err);
+  });
 
-mongoose.connect('mongodb+srv://ngetich86:MI2rjXEuDfTI70jS@nodeapi.xvivcwk.mongodb.net/?retryWrites=true&w=majority&appName=nodeApi',
-    // {   useNewUrlParser: true,   useUnifiedTopology: true}
-)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB', err));
