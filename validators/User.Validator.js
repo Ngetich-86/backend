@@ -9,3 +9,19 @@ export const userRegisterValidator = (user) {
     });
     return userValidationSchema.validate(user, { abortEarly: false });
 }
+
+export const userLoginValidator = (user) => {
+    const userLoginValidationSchema = Joi.object({
+      userName: Joi.string().required(),
+      password: Joi.string().min(4).required(),
+    });
+    return userLoginValidationSchema.validate(user);
+  };
+
+  export const userResetValidator = (user) => {
+    const userResetValidationSchema = Joi.object({
+      email: Joi.string().email().required().trim(),
+      phoneNo: Joi.string().required().trim(),
+    });
+    return userResetValidationSchema.validate(user);
+  };  
