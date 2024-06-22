@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import UserModel from "../models/User.Model";
-import userRegisterValidator from "../validators/User.Validator.js";
-import userLoginValidator from "../validators/UserLogin.Validator.js"; // Assuming this validator exists
+import UserModel from "../models/User.Model.js";
+import {userRegisterValidator} from "../validators/User.Validator.js/";
+import {userLoginValidator} from "../validators/User.Validator.js"; // Assuming this validator exists
+// import {userResetValidator} from "../validators/User.Validator.js"
 import {
   handleValidationError,
   handleMissingParamsError,
@@ -159,3 +160,33 @@ export const loginUser = async (req, res) => {
   };
   tryCatchWrapper(handler, req, res);
 };
+
+export const resetUserLoginCredentials = async (req, res) => {
+  // match the above phoneNo and email with the one in the database then send an email to the user email with the password. if no match, send an error message
+  const { error } = userResetValidator(req.body);
+  if (error) {
+    handleValidationError(error, res);
+    return;
+  }
+  const { phoneNo, email } = req.body;
+  const user = await UserModel.findOne({ phoneNo: phoneNo, email: email });
+  if (user) {
+    const randomPassword = cryptoRandomString({
+      length: 5,
+      type: "alphanumeric",
+    }); // Generate random password
+    const hashedPassword = bcrypt.hashSync(
+      randomPassword,
+      bcrypt.genSaltSync(10)
+    ); // Hash random password
+    user.password = hashedPassword;
+    await user.save(); // Update  user with new hashed password
+    const response = await sendEmail(
+      email,
+      "Password Reset",
+      `Your password is  ${randomPassword}, please keep it safe and use it to login.`
+    ); // Send email to user with new un-hashedPassword
+    if (response) res.status(200).json({ message: response });
+  } else handleUserNotFound(res);
+};
+

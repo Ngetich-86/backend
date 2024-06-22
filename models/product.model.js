@@ -1,5 +1,7 @@
-const mongoose = require("mongoose");
 
+import mongoose from "mongoose";
+
+const { model } = mongoose;
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,11 +23,7 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  category: {
-    type: String,
-    required: false,
-    enum: ["Electronics", "Clothing", "Books"],
-  },
+
   date: {
     type: Date,
     default: Date.now,
@@ -34,13 +32,12 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  image: {
-    type: String,
-  },
+  
   timestamp: {
     type: String,
   },
 });
-
-const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+ 
+export default model("Product", productSchema);
+// const Product = mongoose.model("Product", productSchema);
+// module.exports = Product;
